@@ -107,14 +107,18 @@ label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mute
 <script>
 /* Standalone mode: same ERP, data kept in this browser's localStorage */
 (function(){
-var KEY="cknitz-erp-v1",L={};
+var KEY="cknitz-erp-v2",L={};
 var P=[["Crochet Top",190,140,113,2,50],["moti 2",190,133,115,2,50],["Crop Top",180,126,120,2,40],["Baby Frock",220,154,150,3,60],["Moti ka packet",50,315,400,3,80],["Cushion Cover",165,115,550,2,40],["Co-ord Set",380,266,280,3,70],["Knitwear",320,224,350,3,60],["Dress",280,196,200,3,60],["Custom Order",200,140,200,2,50]];
 var W=[["KISHOR","Crochet",190,133,5000],["OFFICE","Multi-skill",185,130,8000],["MALIK","Crochet",190,133,4000],["NEELAM","Crochet+Stitch",185,130,3000],["RONI","Stitching",180,126,3000],["AKRAM","Crochet",190,133,4000],["SATYA","Home Textile",165,115,5000],["KANTA","Home Textile",165,115,3000],["SONU","Home Textile",165,115,2000],["KUSUM","Multi-skill",175,122,3000]];
 var sl=function(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")};
 var data;try{data=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!data){data={products:{},workers:{},entries:{},payments:{}};
 P.forEach(function(p){data.products[sl(p[0])]={name:p[0],fgRate:p[1],alterRate:p[2],stdGrams:p[3],graceDays:p[4],penaltyPerDay:p[5]}});
-W.forEach(function(w){data.workers[sl(w[0])]={name:w[0],skill:w[1],fgRate:w[2],alterRate:w[3],advanceLimit:w[4]}});}
+W.forEach(function(w){data.workers[sl(w[0])]={name:w[0],skill:w[1],fgRate:w[2],alterRate:w[3],advanceLimit:w[4]}});var E=[["kishor","crochet-top","LOT-101",-29,"Red",5.4,480,40,10,-17,4.5,38,2,0],["kishor","moti-ka-packet","LOT-102",-16,"Cream",5,480,13,12,null,0,5,0,0],["office","cushion-cover","LOT-103",-24,"Ivory",10,380,18,10,-15,9.2,16,1,1],["malik","crop-top","LOT-104",-13,"Dark Pink",3,520,25,10,null,0,6,1,0],["neelam","baby-frock","LOT-105",-8,"Light Pink",2.2,550,14,12,null,0,4,0,0],["roni","dress","LOT-106",-6,"Peach",4,500,20,7,null,0,8,0,0],["akram","crochet-top","LOT-107",-21,"Teal",4.5,480,40,14,-4,4.3,40,0,0],["satya","cushion-cover","LOT-108",-17,"Ivory",11,380,20,12,-6,10.6,20,0,0],["kanta","cushion-cover","LOT-109",-4,"Off White",5.5,380,10,10,null,0,0,0,0],["kusum","co-ord-set","LOT-110",-10,"Navy Blue",3,560,10,9,null,0,3,0,0],["sonu","knitwear","LOT-111",-3,"Black",3.5,520,10,8,null,0,0,0,0]];
+var dd=function(o){var t=new Date();return new Date(Date.UTC(t.getFullYear(),t.getMonth(),t.getDate()+o)).toISOString().slice(0,10)};
+E.forEach(function(e,i){data.entries["demo-"+i]={lotNo:e[2],issueDate:dd(e[3]),workerId:e[0],productId:e[1],color:e[4],matKg:e[5],ratePerKg:e[6],plannedPcs:e[7],daysAllowed:e[8],fgDate:e[9]==null?"":dd(e[9]),fgWeightKg:e[10],okPcs:e[11],alterPcs:e[12],lrPcs:e[13],notes:"DEMO"}});
+[["kishor","Advance",1000,-13],["office","Payment",5000,-8],["akram","Advance",1500,-6]].forEach(function(p,i){data.payments["demo-p"+i]={workerId:p[0],date:dd(p[3]),type:p[1],amount:p[2],note:"DEMO"}});
+}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
 function snap(c){var o=data[c]||{};var docs=Object.keys(o).sort().map(function(id){return{id:id,exists:true,data:function(){return o[id]}}});return{docs:docs,size:docs.length,empty:!docs.length}}
 function fire(c){(L[c]||[]).forEach(function(f){f(snap(c))})}
