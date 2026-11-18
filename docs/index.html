@@ -1,0 +1,444 @@
+<title>CKNITZ ERP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: slim header + four tabs (Dashboard, Lots, Workers & Ledger, Master Control); wide tables scroll inside their own box. */
+:root{
+  --bg:#F4F6F8;--surface:#FFFFFF;--surface2:#EDF0F3;--line:#DDE2E8;
+  --fg:#151A21;--muted:#5B6672;
+  --accent:#0B6E6E;--accent-fg:#FFFFFF;--accent-soft:#D9EFEE;
+  --ok:#1B7F46;--ok-soft:#DDF3E5;--warn:#8A5A00;--warn-soft:#FBEFCF;--crit:#B3261E;--crit-soft:#FBE0DD;
+  --font-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-head:'Space Grotesk','Inter',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1318;--surface:#151C23;--surface2:#1C252E;--line:#2A3540;--fg:#E6EBF0;--muted:#93A0AD;
+  --accent:#4FC3C0;--accent-fg:#062423;--accent-soft:#123635;
+  --ok:#5FD08A;--ok-soft:#12301F;--warn:#F0C25A;--warn-soft:#33290E;--crit:#FF8F86;--crit-soft:#3A1916;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1318;--surface:#151C23;--surface2:#1C252E;--line:#2A3540;--fg:#E6EBF0;--muted:#93A0AD;
+  --accent:#4FC3C0;--accent-fg:#062423;--accent-soft:#123635;
+  --ok:#5FD08A;--ok-soft:#12301F;--warn:#F0C25A;--warn-soft:#33290E;--crit:#FF8F86;--crit-soft:#3A1916;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-body);
+  padding-block:0 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1280px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding:18px 0 14px;border-bottom:1px solid var(--line)}
+h1{font:700 20px/1 var(--font-head);letter-spacing:.02em;margin:0}
+h1 small{display:block;font:500 11px/1.3 var(--font-body);color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:5px}
+nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+nav a{padding:8px 14px;border-radius:8px;color:var(--muted);text-decoration:none;font-weight:500}
+nav a:hover{background:var(--surface2);color:var(--fg)}
+nav a[aria-current="page"]{background:var(--accent);color:var(--accent-fg)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-top:20px;display:flex;flex-direction:column;gap:20px}
+h2{font:600 16px/1.2 var(--font-head);margin:0}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.row.between{justify-content:space-between}
+.muted{color:var(--muted)}
+.note{background:var(--warn-soft);color:var(--warn);padding:10px 14px;border-radius:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.kpi .l{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font:600 24px/1.2 var(--font-head);margin-top:6px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px}
+.kpi.crit .v{color:var(--crit)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.panel .scroll{border:0;border-radius:0}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--surface2);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right}
+td.name{font-weight:600}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:500;background:var(--surface2);color:var(--muted)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.crit{background:var(--crit-soft);color:var(--crit)}
+button,.btn{font:500 13px var(--font-body);padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+button:hover{background:var(--surface2)}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button.primary:hover{filter:brightness(1.08)}
+button.sm{padding:4px 9px;font-size:12px}
+button.danger{color:var(--crit)}
+button:disabled,input:disabled,select:disabled{opacity:.5;cursor:not-allowed}
+input,select,textarea{font:14px var(--font-body);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%;min-width:0}
+td input{padding:5px 7px;width:92px;text-align:right}
+td input.txt{width:150px;text-align:left}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500}
+.filters select{width:auto}
+.bar{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:10px;align-items:center;font-variant-numeric:tabular-nums}
+.bar .t{display:flex;height:14px;border-radius:4px;overflow:hidden;background:var(--surface2)}
+.bar .t i{display:block;height:100%}
+.bar .t .got{background:var(--accent)}
+.bar .t .pend{background:var(--warn)}
+.bar b{font-weight:600}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;background:var(--accent)}
+.legend span.p::before{background:var(--warn)}
+.scrim{position:fixed;inset:0;background:rgba(10,14,18,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 12px;z-index:20}
+.scrim[hidden]{display:none}
+.sheet{background:var(--surface);border:1px solid var(--line);border-radius:12px;width:100%;max-width:760px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.preview{background:var(--surface2);border-radius:8px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13px}
+.preview b{font-variant-numeric:tabular-nums}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.kpi,.pill,button{transition:background .15s,filter .15s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>CKNITZ ERP<small>Job-work production &amp; payments</small></h1>
+    <nav id="nav" aria-label="Sections">
+      <a href="#dashboard" data-tab="dashboard">Dashboard</a>
+      <a href="#lots" data-tab="lots">Lots</a>
+      <a href="#ledger" data-tab="ledger">Workers &amp; Ledger</a>
+      <a href="#master" data-tab="master">Master Control</a>
+    </nav>
+  </header>
+  <main id="view"><div class="empty">Loading your data…</div></main>
+</div>
+
+<div class="scrim" id="panel" hidden><form class="sheet" id="entryForm" autocomplete="off"></form></div>
+
+<script>
+/* Standalone mode: same ERP, data kept in this browser's localStorage */
+(function(){
+var KEY="cknitz-erp-v1",L={};
+var P=[["Crochet Top",190,140,113,2,50],["moti 2",190,133,115,2,50],["Crop Top",180,126,120,2,40],["Baby Frock",220,154,150,3,60],["Moti ka packet",50,315,400,3,80],["Cushion Cover",165,115,550,2,40],["Co-ord Set",380,266,280,3,70],["Knitwear",320,224,350,3,60],["Dress",280,196,200,3,60],["Custom Order",200,140,200,2,50]];
+var W=[["KISHOR","Crochet",190,133,5000],["OFFICE","Multi-skill",185,130,8000],["MALIK","Crochet",190,133,4000],["NEELAM","Crochet+Stitch",185,130,3000],["RONI","Stitching",180,126,3000],["AKRAM","Crochet",190,133,4000],["SATYA","Home Textile",165,115,5000],["KANTA","Home Textile",165,115,3000],["SONU","Home Textile",165,115,2000],["KUSUM","Multi-skill",175,122,3000]];
+var sl=function(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")};
+var data;try{data=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!data){data={products:{},workers:{},entries:{},payments:{}};
+P.forEach(function(p){data.products[sl(p[0])]={name:p[0],fgRate:p[1],alterRate:p[2],stdGrams:p[3],graceDays:p[4],penaltyPerDay:p[5]}});
+W.forEach(function(w){data.workers[sl(w[0])]={name:w[0],skill:w[1],fgRate:w[2],alterRate:w[3],advanceLimit:w[4]}});}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+function snap(c){var o=data[c]||{};var docs=Object.keys(o).sort().map(function(id){return{id:id,exists:true,data:function(){return o[id]}}});return{docs:docs,size:docs.length,empty:!docs.length}}
+function fire(c){(L[c]||[]).forEach(function(f){f(snap(c))})}
+function col(c){data[c]=data[c]||{};return{
+onSnapshot:function(n){(L[c]=L[c]||[]).push(n);setTimeout(function(){n(snap(c))},0);return function(){}},
+add:function(d){var id="e"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);data[c][id]=d;save();fire(c);return Promise.resolve()},
+doc:function(id){return{
+set:function(d){data[c][id]=d;save();fire(c);return Promise.resolve()},
+update:function(d){data[c][id]=Object.assign({},data[c][id],d);save();fire(c);return Promise.resolve()},
+delete:function(){delete data[c][id];save();fire(c);return Promise.resolve()}}}}}
+window.claude={use:function(n){return Promise.resolve(n==="db"?{collection:col}:null)}};
+})();
+</script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY=864e5, PENALTY_CAP=2000;
+const dayOf=s=>s?Math.floor(Date.parse(s+'T00:00:00Z')/DAY):null;
+const now=new Date();
+const TODAY=Math.floor(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())/DAY);
+const iso=d=>new Date(d*DAY).toISOString().slice(0,10);
+const fmtD=d=>d==null?'—':new Date(d*DAY).toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});
+const inr=n=>(n<0?'−':'')+'₹'+Math.abs(Math.round(n)).toLocaleString('en-IN');
+const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
+const slug=s=>String(s).trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+let DB=null,tab='dashboard',filt={worker:'',status:''},editingId=null,pendingRender=false;
+const S={products:{},workers:{},entries:{},payments:{},loaded:{},canWrite:true,err:null,slow:false};
+
+/* ---------- calculation engine (same chain as the worker sheet columns) ---------- */
+function derive(e){
+  const p=S.products[e.productId]||{};
+  const std=num(p.stdGrams), grace=p.graceDays==null?2:num(p.graceDays), pr=p.penaltyPerDay==null?50:num(p.penaltyPerDay);
+  const issue=dayOf(e.issueDate), fg=dayOf(e.fgDate);
+  const mat=num(e.matKg), ok=num(e.okPcs), al=num(e.alterPcs), lr=num(e.lrPcs), plan=num(e.plannedPcs), days=num(e.daysAllowed);
+  const expPcs=mat>0&&std>0?Math.round(mat*1000/std):null;
+  const base=plan>0?plan:(expPcs||0);
+  const exp=days>0&&issue!=null?issue+days:null;
+  const recv=ok+al+lr;
+  const pending=Math.max(0,base-recv);
+  const avg=num(e.fgWeightKg)>0&&ok>0?Math.round(num(e.fgWeightKg)/ok*10000)/10:null;
+  let delay=0;
+  if(exp!=null){
+    if(fg!=null) delay=Math.max(0,fg-exp);
+    else if(!(pending===0&&base>0)) delay=Math.max(0,TODAY-exp);
+  }
+  const penalty=Math.min(Math.max(0,delay-grace)*pr,PENALTY_CAP);
+  const status=recv===0?'Issued':pending>0?'In progress':(delay>0?'Late':'Done');
+  let risk=null;
+  if(exp!=null){
+    if(pending===0&&recv>0) risk=delay>0?'Late':'Done';
+    else if(TODAY>exp) risk='Overdue';
+    else risk=(exp-TODAY<=2)?'At risk':'On track';
+  }
+  let forecast=null;
+  if(pending===0&&recv>0) forecast=fg;
+  else if(recv>0&&issue!=null){const pace=recv/Math.max(1,TODAY-issue);forecast=TODAY+Math.ceil(pending/pace);}
+  let dl=null;
+  if(exp!=null){
+    if(pending===0&&recv>0) dl=delay>0?'Miss':'OK';
+    else if(TODAY>exp) dl='Miss';
+    else if(forecast!=null) dl=forecast>exp?'Miss':(forecast>=exp-2?'Tight':'OK');
+    else dl=(exp-TODAY<=2)?'Tight':'OK';
+  }
+  return {std,grace,pr,issue,fg,mat,ok,al,lr,base,expPcs,exp,recv,pending,avg,delay,penalty,status,risk,forecast,dl,
+    matValue:mat>0&&num(e.ratePerKg)>0?mat*num(e.ratePerKg):null,
+    donePct:base>0?Math.round(recv/base*100):null,
+    wtPct:avg&&std?Math.round(avg/std*100):null};
+}
+function ledgerRows(){
+  return Object.entries(S.workers).map(([id,w])=>{
+    let ok=0,al=0,pen=0;
+    Object.values(S.entries).forEach(e=>{if(e.workerId===id){const d=derive(e);ok+=d.ok;al+=d.al;pen+=d.penalty;}});
+    let adv=0,paid=0;
+    Object.values(S.payments).forEach(p=>{if(p.workerId===id){if(p.type==='Advance')adv+=num(p.amount);else paid+=num(p.amount);}});
+    const fgV=ok*num(w.fgRate), alV=al*num(w.alterRate), gross=fgV+alV-pen;
+    return {id,name:w.name,ok,al,fgV,alV,pen,gross,adv,paid,net:gross-adv-paid,limit:num(w.advanceLimit),fgRate:num(w.fgRate),alterRate:num(w.alterRate)};
+  }).sort((a,b)=>a.name.localeCompare(b.name));
+}
+
+/* ---------- small view helpers ---------- */
+const pill=(t,cls)=>t?`<span class="pill ${cls||''}">${esc(t)}</span>`:'<span class="muted">—</span>';
+const riskCls=t=>({'Overdue':'crit','Late':'crit','Miss':'crit','At risk':'warn','Tight':'warn','Done':'ok','On track':'ok','OK':'ok','In progress':'warn'}[t]||'');
+const wName=id=>(S.workers[id]||{}).name||'?';
+const pName=id=>(S.products[id]||{}).name||'?';
+const sortedEntries=()=>Object.entries(S.entries).sort((a,b)=>(b[1].issueDate||'').localeCompare(a[1].issueDate||'')||(b[1].lotNo||'').localeCompare(a[1].lotNo||''));
+const dis=()=>S.canWrite?'':' disabled';
+
+/* ---------- views ---------- */
+function vDashboard(){
+  const rows=sortedEntries().map(([id,e])=>({id,e,d:derive(e)}));
+  const lr=ledgerRows();
+  const base=rows.reduce((a,r)=>a+r.d.base,0), recv=rows.reduce((a,r)=>a+r.d.recv,0), pend=rows.reduce((a,r)=>a+r.d.pending,0);
+  const ok=rows.reduce((a,r)=>a+r.d.ok,0);
+  const overdue=rows.filter(r=>r.d.risk==='Overdue').length;
+  const pen=rows.reduce((a,r)=>a+r.d.penalty,0);
+  const net=lr.reduce((a,r)=>a+r.net,0);
+  const attn=rows.filter(r=>['Overdue','At risk','Late'].includes(r.d.risk)||r.d.dl==='Miss').filter(r=>r.d.pending>0||r.d.penalty>0)
+    .sort((a,b)=>b.d.delay-a.d.delay).slice(0,8);
+  const maxBase=Math.max(1,...lr.map(w=>rowsFor(rows,w.id).base));
+  const bars=lr.filter(w=>rowsFor(rows,w.id).base>0).map(w=>{
+    const t=rowsFor(rows,w.id);
+    return `<div class="bar"><span>${esc(w.name)}</span><div class="t" title="${t.recv} received, ${t.pend} pending"><i class="got" style="width:${t.recv/maxBase*100}%"></i><i class="pend" style="width:${t.pend/maxBase*100}%"></i></div><span><b>${t.recv}</b> / ${t.base} pcs</span></div>`;
+  }).join('')||'<div class="empty">No lots issued yet. Add one in the Lots tab.</div>';
+  return `
+  <div class="kpis">
+    <div class="kpi"><div class="l">Lots</div><div class="v">${rows.length}</div><div class="s">${rows.filter(r=>r.d.pending>0).length} still open</div></div>
+    <div class="kpi"><div class="l">Pieces planned</div><div class="v">${base}</div><div class="s">${recv} received</div></div>
+    <div class="kpi"><div class="l">OK pieces</div><div class="v">${ok}</div><div class="s">${rows.reduce((a,r)=>a+r.d.al,0)} alter · ${rows.reduce((a,r)=>a+r.d.lr,0)} LR</div></div>
+    <div class="kpi"><div class="l">Pending pieces</div><div class="v">${pend}</div><div class="s">${base?Math.round(recv/base*100):0}% complete</div></div>
+    <div class="kpi ${overdue?'crit':''}"><div class="l">Overdue lots</div><div class="v">${overdue}</div><div class="s">past expected FG date</div></div>
+    <div class="kpi ${pen?'crit':''}"><div class="l">Penalty</div><div class="v">${inr(pen)}</div><div class="s">across all lots</div></div>
+    <div class="kpi"><div class="l">Net payable</div><div class="v">${inr(net)}</div><div class="s">after advances &amp; payments</div></div>
+  </div>
+  <div class="cols">
+    <section class="panel"><div class="row between"><h2>Production by worker</h2><div class="legend"><span>Received</span><span class="p">Pending</span></div></div>${bars}</section>
+    <section class="panel"><h2>Needs attention</h2>
+      ${attn.length?`<div class="scroll"><table><thead><tr><th>Lot</th><th>Worker</th><th>Product</th><th>Expected FG</th><th class="n">Pending</th><th>Risk</th><th class="n">Penalty</th></tr></thead><tbody>${
+        attn.map(r=>`<tr><td class="name">${esc(r.e.lotNo)}</td><td>${esc(wName(r.e.workerId))}</td><td>${esc(pName(r.e.productId))}</td><td>${fmtD(r.d.exp)}</td><td class="n">${r.d.pending}</td><td>${pill(r.d.risk,riskCls(r.d.risk))}</td><td class="n">${inr(r.d.penalty)}</td></tr>`).join('')}</tbody></table></div>`
+      :'<div class="empty">Nothing is late or at risk right now.</div>'}
+    </section>
+  </div>`;
+}
+function rowsFor(rows,wid){let base=0,recv=0,pend=0;rows.forEach(r=>{if(r.e.workerId===wid){base+=r.d.base;recv+=r.d.recv;pend+=r.d.pending;}});return {base,recv,pend};}
+
+function vLots(){
+  let rows=sortedEntries().map(([id,e])=>({id,e,d:derive(e)}));
+  if(filt.worker) rows=rows.filter(r=>r.e.workerId===filt.worker);
+  if(filt.status) rows=rows.filter(r=>r.d.status===filt.status);
+  const wOpts='<option value="">All workers</option>'+Object.entries(S.workers).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,w])=>`<option value="${esc(id)}"${filt.worker===id?' selected':''}>${esc(w.name)}</option>`).join('');
+  const sOpts='<option value="">All statuses</option>'+['Issued','In progress','Done','Late'].map(s=>`<option${filt.status===s?' selected':''}>${s}</option>`).join('');
+  const body=rows.map(({id,e,d})=>`<tr>
+    <td class="name">${esc(e.lotNo)}</td><td>${fmtD(d.issue)}</td><td>${esc(wName(e.workerId))}</td><td>${esc(pName(e.productId))}</td><td>${esc(e.color)}</td>
+    <td class="n">${d.mat||'—'}</td><td class="n">${d.expPcs==null?'—':d.expPcs}</td><td class="n">${d.base||'—'}</td>
+    <td>${fmtD(d.exp)}</td><td>${fmtD(d.fg)}</td>
+    <td class="n">${d.ok}</td><td class="n">${d.al}</td><td class="n">${d.lr}</td><td class="n"><b>${d.pending}</b></td>
+    <td class="n">${d.donePct==null?'—':d.donePct+'%'}</td>
+    <td class="n">${d.avg==null?'—':d.avg+' g'}${d.wtPct?` <span class="muted">(${d.wtPct}%)</span>`:''}</td>
+    <td class="n">${d.delay}</td><td>${pill(d.status,riskCls(d.status))}</td><td>${pill(d.risk,riskCls(d.risk))}</td>
+    <td class="n">${inr(d.penalty)}</td><td>${fmtD(d.forecast)}</td><td>${pill(d.dl,riskCls(d.dl))}</td>
+    <td><button class="sm" data-act="edit" data-id="${esc(id)}"${dis()}>Edit</button> <button class="sm danger" data-act="del" data-coll="entries" data-id="${esc(id)}"${dis()}>Delete</button></td></tr>`).join('');
+  return `<div class="row between"><div class="row filters"><h2>Lots</h2><select id="fWorker" aria-label="Filter by worker">${wOpts}</select><select id="fStatus" aria-label="Filter by status">${sOpts}</select></div>
+    <button class="primary" data-act="new"${dis()}>+ New lot</button></div>
+    ${rows.length?`<div class="scroll"><table><thead><tr><th>Lot</th><th>Issued</th><th>Worker</th><th>Product</th><th>Color</th><th class="n">Mat kg</th><th class="n">Exp pcs</th><th class="n">Planned</th><th>Expected FG</th><th>FG received</th><th class="n">OK</th><th class="n">Alter</th><th class="n">LR</th><th class="n">Pending</th><th class="n">Done</th><th class="n">Avg / pc (vs std)</th><th class="n">Delay d</th><th>FG status</th><th>Delay risk</th><th class="n">Penalty</th><th>Forecast</th><th>Deadline</th><th></th></tr></thead><tbody>${body}</tbody></table></div>`
+    :'<div class="empty">No lots match. Use “New lot” to issue material to a worker.</div>'}
+    <p class="muted" style="margin:0">Penalty = (delay days − grace days) × penalty per day, capped at ${inr(PENALTY_CAP)} per lot. Grace and rate come from Master Control. “Avg / pc” is FG weight ÷ OK pcs; the percentage compares it to the product’s standard grams.</p>`;
+}
+
+function vLedger(){
+  const L=ledgerRows();
+  const body=L.map(r=>`<tr><td class="name">${esc(r.name)}</td><td class="n">${r.ok}</td><td class="n">${inr(r.fgV)}</td><td class="n">${r.al}</td><td class="n">${inr(r.alV)}</td><td class="n">${inr(r.pen)}</td><td class="n">${inr(r.gross)}</td><td class="n">${inr(r.adv)}${r.limit&&r.adv>r.limit?' '+pill('over limit','crit'):''}</td><td class="n">${inr(r.paid)}</td><td class="n"><b>${inr(r.net)}</b></td><td>${r.net>0?pill('Due','warn'):r.net<0?pill('Overpaid','crit'):pill('Settled','ok')}</td></tr>`).join('');
+  const tot=L.reduce((a,r)=>({g:a.g+r.gross,a:a.a+r.adv,p:a.p+r.paid,n:a.n+r.net}),{g:0,a:0,p:0,n:0});
+  const wOpts=Object.entries(S.workers).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([id,w])=>`<option value="${esc(id)}">${esc(w.name)}</option>`).join('');
+  const pays=Object.entries(S.payments).sort((a,b)=>(b[1].date||'').localeCompare(a[1].date||'')).slice(0,30).map(([id,p])=>`<tr><td>${fmtD(dayOf(p.date))}</td><td>${esc(wName(p.workerId))}</td><td>${pill(p.type,p.type==='Advance'?'warn':'ok')}</td><td class="n">${inr(num(p.amount))}</td><td>${esc(p.note||'')}</td><td><button class="sm danger" data-act="del" data-coll="payments" data-id="${esc(id)}"${dis()}>Delete</button></td></tr>`).join('');
+  return `<div class="row between"><h2>Workers &amp; Ledger</h2><span class="muted">Total net payable <b style="color:var(--fg)">${inr(tot.n)}</b> · gross ${inr(tot.g)} · advances ${inr(tot.a)} · paid ${inr(tot.p)}</span></div>
+  ${L.length?`<div class="scroll"><table><thead><tr><th>Worker</th><th class="n">OK pcs</th><th class="n">FG value</th><th class="n">Alter pcs</th><th class="n">Alter value</th><th class="n">Penalty</th><th class="n">Gross</th><th class="n">Advances</th><th class="n">Paid</th><th class="n">Net payable</th><th>Status</th></tr></thead><tbody>${body}</tbody></table></div>`:'<div class="empty">Add workers in Master Control first.</div>'}
+  <p class="muted" style="margin:0">Every total is summed from the lot rows, so a new worker or lot is always included. Gross = OK pcs × FG rate + alter pcs × alter rate − penalty. Net = gross − advances − payments.</p>
+  <div class="cols">
+    <form class="panel" id="payForm"><h2>Record a payment</h2>
+      <div class="grid">
+        <label>Worker<select id="pWorker" required>${wOpts}</select></label>
+        <label>Date<input id="pDate" type="date" value="${iso(TODAY)}" required></label>
+        <label>Type<select id="pType"><option>Advance</option><option>Payment</option></select></label>
+        <label>Amount ₹<input id="pAmt" type="number" min="1" step="1" required></label>
+      </div>
+      <label>Note<input id="pNote" type="text" maxlength="120"></label>
+      <div><button class="primary" type="submit"${dis()}>Save payment</button></div>
+    </form>
+    <section class="panel"><h2>Recent payments</h2>${pays?`<div class="scroll"><table><thead><tr><th>Date</th><th>Worker</th><th>Type</th><th class="n">Amount</th><th>Note</th><th></th></tr></thead><tbody>${pays}</tbody></table></div>`:'<div class="empty">No payments recorded yet.</div>'}</section>
+  </div>`;
+}
+
+function vMaster(){
+  const P=Object.entries(S.products).sort((a,b)=>a[1].name.localeCompare(b[1].name));
+  const W=Object.entries(S.workers).sort((a,b)=>a[1].name.localeCompare(b[1].name));
+  const inp=(coll,id,f,v,step)=>`<input type="number" step="${step||1}" min="0" value="${esc(v==null?'':v)}" data-coll="${coll}" data-id="${esc(id)}" data-field="${f}" aria-label="${f}"${dis()}>`;
+  return `<h2>Master Control</h2>
+  <section class="panel"><h2>Products</h2>
+    <div class="scroll"><table><thead><tr><th>Product</th><th class="n">FG rate ₹/pc</th><th class="n">Alter rate ₹/pc</th><th class="n">Std grams/pc</th><th class="n">Grace days</th><th class="n">Penalty ₹/day</th></tr></thead><tbody>${
+    P.map(([id,p])=>`<tr><td class="name">${esc(p.name)}</td><td class="n">${inp('products',id,'fgRate',p.fgRate)}</td><td class="n">${inp('products',id,'alterRate',p.alterRate)}</td><td class="n">${inp('products',id,'stdGrams',p.stdGrams)}</td><td class="n">${inp('products',id,'graceDays',p.graceDays)}</td><td class="n">${inp('products',id,'penaltyPerDay',p.penaltyPerDay)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">No products yet.</td></tr>'}</tbody></table></div>
+    <form class="row" id="addProduct"><input id="npName" type="text" placeholder="New product name" required style="max-width:220px"><button type="submit"${dis()}>Add product</button></form>
+  </section>
+  <section class="panel"><h2>Job workers</h2>
+    <div class="scroll"><table><thead><tr><th>Worker</th><th>Skill</th><th class="n">FG rate ₹/pc</th><th class="n">Alter rate ₹/pc</th><th class="n">Advance limit ₹</th></tr></thead><tbody>${
+    W.map(([id,w])=>`<tr><td class="name">${esc(w.name)}</td><td>${esc(w.skill||'')}</td><td class="n">${inp('workers',id,'fgRate',w.fgRate)}</td><td class="n">${inp('workers',id,'alterRate',w.alterRate)}</td><td class="n">${inp('workers',id,'advanceLimit',w.advanceLimit)}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">No workers yet.</td></tr>'}</tbody></table></div>
+    <form class="row" id="addWorker"><input id="nwName" type="text" placeholder="New worker name" required style="max-width:220px"><button type="submit"${dis()}>Add worker</button></form>
+  </section>
+  <p class="muted" style="margin:0">Changes save as soon as you leave a field and update every lot and the ledger.</p>`;
+}
+
+/* ---------- render ---------- */
+function editingField(){const a=document.activeElement;return a&&$('#view').contains(a)&&/^(INPUT|TEXTAREA)$/.test(a.tagName);}
+function render(force){
+  if(!force&&editingField()){pendingRender=true;return;}
+  pendingRender=false;
+  document.querySelectorAll('#nav a').forEach(a=>a.setAttribute('aria-current',a.dataset.tab===tab?'page':'false'));
+  const v=$('#view');
+  if(!DB){v.innerHTML='<div class="note">Saved data is not available in this view. Sign in to the artifact to load and edit your ERP data.</div>';return;}
+  const ready=['products','workers','entries','payments'].every(k=>S.loaded[k]);
+  if(!ready){v.innerHTML=`<div class="empty">Loading your data…</div>${S.slow?'<div class="note">Still can’t reach the saved data. It will appear as soon as it connects.</div>':''}`;return;}
+  const html={dashboard:vDashboard,lots:vLots,ledger:vLedger,master:vMaster}[tab]();
+  v.innerHTML=(S.canWrite?'':'<div class="note">You can view this ERP but not change it.</div>')+html;
+}
+let raf=0;function schedule(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>render(false));}
+function route(){const h=location.hash.slice(1);tab=['dashboard','lots','ledger','master'].includes(h)?h:'dashboard';render(true);}
+window.addEventListener('hashchange',route);
+document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRender&&!editingField())render(true);},60));
+
+/* ---------- lot form ---------- */
+function nextLot(){let m=100;Object.values(S.entries).forEach(e=>{const n=parseInt(String(e.lotNo).replace(/\D/g,''),10);if(n>m)m=n;});return 'LOT-'+String(m+1).padStart(3,'0');}
+function field(id,label,type,val,extra){return `<label>${label}<input id="${id}" type="${type}" value="${esc(val==null?'':val)}" ${extra||''}></label>`;}
+function openForm(id){
+  editingId=id||null;
+  const e=id?S.entries[id]:{lotNo:nextLot(),issueDate:iso(TODAY)};
+  const opt=(o,sel)=>Object.entries(o).sort((a,b)=>a[1].name.localeCompare(b[1].name)).map(([k,v])=>`<option value="${esc(k)}"${k===sel?' selected':''}>${esc(v.name)}</option>`).join('');
+  $('#entryForm').innerHTML=`
+    <div class="row between"><h2>${id?'Edit lot':'New lot'}</h2><button type="button" data-act="close">Close</button></div>
+    <div class="grid">
+      ${field('fLot','Lot no.','text',e.lotNo,'required')}
+      ${field('fIssue','Issue date','date',e.issueDate,'required')}
+      <label>Worker<select id="fW" required><option value="">Select…</option>${opt(S.workers,e.workerId)}</select></label>
+      <label>Product<select id="fP" required><option value="">Select…</option>${opt(S.products,e.productId)}</select></label>
+      ${field('fColor','Color','text',e.color)}
+      ${field('fMat','Material issued (kg)','number',e.matKg,'min="0" step="0.001"')}
+      ${field('fRate','Rate ₹/kg','number',e.ratePerKg,'min="0" step="0.01"')}
+      ${field('fPlan','Planned pcs','number',e.plannedPcs,'min="0" step="1"')}
+      ${field('fDays','Days allowed','number',e.daysAllowed,'min="0" step="1"')}
+      ${field('fFgDate','FG received date','date',e.fgDate)}
+      ${field('fFgWt','FG weight (kg)','number',e.fgWeightKg,'min="0" step="0.001"')}
+      ${field('fOk','OK pcs','number',e.okPcs,'min="0" step="1"')}
+      ${field('fAl','Alter pcs','number',e.alterPcs,'min="0" step="1"')}
+      ${field('fLr','LR pcs (loss / reject)','number',e.lrPcs,'min="0" step="1"')}
+    </div>
+    ${field('fNotes','Notes','text',e.notes,'maxlength="200"')}
+    <div class="preview" id="fPrev"></div>
+    <div class="row"><button class="primary" type="submit"${dis()}>Save lot</button><span class="muted" id="fErr" role="alert"></span></div>`;
+  $('#panel').hidden=false;preview();
+}
+function readForm(){
+  const g=i=>$('#'+i).value;
+  return {lotNo:g('fLot').trim(),issueDate:g('fIssue'),workerId:g('fW'),productId:g('fP'),color:g('fColor').trim(),
+    matKg:num(g('fMat')),ratePerKg:num(g('fRate')),plannedPcs:num(g('fPlan')),daysAllowed:num(g('fDays')),
+    fgDate:g('fFgDate'),fgWeightKg:num(g('fFgWt')),okPcs:num(g('fOk')),alterPcs:num(g('fAl')),lrPcs:num(g('fLr')),notes:g('fNotes').trim()};
+}
+function preview(){
+  const el=$('#fPrev');if(!el)return;
+  const e=readForm(),d=derive(e);
+  el.innerHTML=`<span>Material value <b>${d.matValue==null?'—':inr(d.matValue)}</b></span><span>Expected pcs <b>${d.expPcs==null?'—':d.expPcs}</b></span><span>Expected FG <b>${fmtD(d.exp)}</b></span><span>Pending <b>${d.pending}</b></span><span>Delay <b>${d.delay} d</b></span><span>Penalty <b>${inr(d.penalty)}</b></span>`;
+}
+function closeForm(){$('#panel').hidden=true;editingId=null;}
+
+/* ---------- actions ---------- */
+async function safe(fn){try{await fn();}catch(err){console.error(err);const el=$('#fErr');if(el)el.textContent='Could not save: '+(err&&err.message||'try again');else alert_(err);}}
+function alert_(err){const v=$('#view');const n=document.createElement('div');n.className='note';n.textContent='Could not save: '+(err&&err.message||'try again');v.prepend(n);setTimeout(()=>n.remove(),5000);}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act;
+  if(a==='new')openForm();
+  else if(a==='edit')openForm(b.dataset.id);
+  else if(a==='close')closeForm();
+  else if(a==='del'){
+    if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='Sure? Delete';setTimeout(()=>{b.dataset.armed='';b.textContent='Delete';},3500);return;}
+    safe(()=>DB.collection(b.dataset.coll).doc(b.dataset.id).delete());
+  }
+});
+$('#panel').addEventListener('click',e=>{if(e.target.id==='panel')closeForm();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#panel').hidden)closeForm();});
+$('#entryForm').addEventListener('input',preview);
+$('#entryForm').addEventListener('submit',ev=>{
+  ev.preventDefault();
+  const d=readForm();
+  if(!d.workerId||!d.productId||!d.lotNo||!d.issueDate){$('#fErr').textContent='Lot no., date, worker and product are required.';return;}
+  safe(async()=>{
+    const col=DB.collection('entries');
+    if(editingId) await col.doc(editingId).set(d); else await col.add(d);
+    closeForm();
+  });
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='fWorker'){filt.worker=t.value;render(true);return;}
+  if(t.id==='fStatus'){filt.status=t.value;render(true);return;}
+  if(t.dataset&&t.dataset.coll&&t.dataset.field){
+    safe(()=>DB.collection(t.dataset.coll).doc(t.dataset.id).update({[t.dataset.field]:num(t.value)}));
+  }
+});
+document.addEventListener('submit',ev=>{
+  const f=ev.target;
+  if(f.id==='payForm'){
+    ev.preventDefault();
+    const amt=num($('#pAmt').value);if(amt<=0)return;
+    safe(async()=>{await DB.collection('payments').add({workerId:$('#pWorker').value,date:$('#pDate').value,type:$('#pType').value,amount:amt,note:$('#pNote').value.trim()});$('#pAmt').value='';$('#pNote').value='';});
+  } else if(f.id==='addProduct'){
+    ev.preventDefault();
+    const name=$('#npName').value.trim();const id=slug(name);if(!id)return;
+    safe(async()=>{await DB.collection('products').doc(id).set({name,fgRate:0,alterRate:0,stdGrams:0,graceDays:2,penaltyPerDay:50});$('#npName').value='';});
+  } else if(f.id==='addWorker'){
+    ev.preventDefault();
+    const name=$('#nwName').value.trim().toUpperCase();const id=slug(name);if(!id)return;
+    safe(async()=>{await DB.collection('workers').doc(id).set({name,skill:'',fgRate:0,alterRate:0,advanceLimit:0});$('#nwName').value='';});
+  }
+});
+
+/* ---------- boot ---------- */
+route();
+(async function(){
+  try{
+    DB=await window.claude.use('db');
+    const user=await window.claude.use('user');
+    if(user&&typeof user.can==='function'){S.canWrite=user.can('data.write')!==false;}
+  }catch(e){DB=null;}
+  if(!DB){render(true);return;}
+  const timer=setTimeout(()=>{S.slow=true;render(false);},10000);
+  ['products','workers','entries','payments'].forEach(name=>{
+    DB.collection(name).onSnapshot(snap=>{
+      const o={};snap.docs.forEach(d=>{o[d.id]=d.data();});
+      S[name]=o;S.loaded[name]=true;
+      if(['products','workers','entries','payments'].every(k=>S.loaded[k]))clearTimeout(timer);
+      schedule();
+    },err=>{S.err=err&&err.code;S.loaded[name]=true;schedule();});
+  });
+})();
+})();
+</script>

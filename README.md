@@ -16,3 +16,6 @@ cd apps/api && npm install && npx vitest run
 - Ledger total is summed from all lots, so no worker is skipped.
 
 Copy `apps/api/.env.example` to `.env` and set `DATABASE_URL` before using the API.
+
+## Live page
+`docs/index.html` is the same ERP running standalone on GitHub Pages. Data is saved in the browser's localStorage, so it stays on that device and is not shared between people.
